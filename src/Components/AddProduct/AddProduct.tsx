@@ -5,16 +5,17 @@ import { useNavigate } from "react-router-dom";
 import { addProduct } from "../../redux/Slice";
 import Loader from "../Loader/Loader";
 import toast from "react-hot-toast";
+import { AppDispatch, RootState } from "../../redux/Store";
 
 const AddProduct = () => {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const file = useRef<HTMLInputElement>(null); 
     const [image, setImage] = useState<File | null>(null); 
     const [name, setname] = useState<string>(""); 
     const [price, setprice] = useState<string>(""); 
     const [showImage, setshowImage] = useState<string>("");
-    const { loading } = useSelector((state) => state.products)
+    const { loading } = useSelector((state : RootState) => state.products)
 
 
     const handleBackClick = () : void => {
@@ -24,7 +25,7 @@ const AddProduct = () => {
         file.current?.click();
     }
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) : void => {
-        const file = e.target.files[0];
+        const file = e.target.files ? e.target.files[0] : null;
         if(file){
             setImage(file);
             const imageUrl = URL.createObjectURL(file);
@@ -33,7 +34,9 @@ const AddProduct = () => {
     }
     const handleAddClick= () : void =>{
         const data = new FormData();
-        data.append('image', image);
+        if(image){
+          data.append("image", image);
+        }
         data.append('name', name);
         data.append('price',price);
         dispatch(addProduct(data)).then((result)=>{

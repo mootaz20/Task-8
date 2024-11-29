@@ -3,10 +3,22 @@ import "./Product.css";
 import { deleteProduct, deleteProductReducer } from "../../../redux/Slice";
 import { useNavigate } from "react-router-dom";
 import DeleteModal from "../DeleteModal/DeleteModal";
-import { MouseEvent, useState } from "react";
+import React, { MouseEvent, useState } from "react";
+import { AppDispatch } from "../../../redux/Store";
 
-const Product = ({ product }) => {
-  const dispatch = useDispatch();
+interface ProductProps {
+  id: number | string;
+  name: string;
+  price: string;
+  image_url: string;
+  created_at: string;
+  updated_at: string;
+}
+interface Props {
+  product: ProductProps;
+}
+const Product : React.FC<Props> = ({ product }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [showModal, setshowModal] = useState<boolean>(false);
 

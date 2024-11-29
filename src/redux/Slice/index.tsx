@@ -2,14 +2,42 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const initialState = {
+interface Product {
+  id: number; 
+  name: string; 
+  price: string; 
+  image_url: string; 
+  created_at: string; 
+  updated_at: string;
+}
+
+interface ProductsState {
+  products: Product[];
+  AllProducts: Product[];
+  product: Product;
+  loading: boolean;
+  error: string | undefined | unknown;
+  totalPages: number;
+  itemsPerPage: number;
+  currentPage: number;
+}
+
+const initialState: ProductsState = {
   products: [],
   AllProducts: [],
+  product: {
+    id: 0, 
+    name: "",
+    price: "",
+    image_url: "",
+    created_at: "",
+    updated_at: "",
+  },
   loading: false,
   error: null,
-  totalPages : 0,
+  totalPages: 0,
   itemsPerPage: 8,
-  currentPage: 1, 
+  currentPage: 1,
 };
 
 export const getAllProducts = createAsyncThunk(
@@ -26,14 +54,19 @@ export const getAllProducts = createAsyncThunk(
         return response.data;
       }
     } catch (error) {
-      toast.error(error.response.data.message);
-      return rejectWithValue(error.response.data.message);
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "An error occurred");
+        return rejectWithValue(error.response?.data?.message);
+      } else {
+        toast.error("An unexpected error occurred");
+        return rejectWithValue("An unexpected error occurred");
+      }
     }
   }
 );
 export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
-  async (id, { rejectWithValue }) => {
+  async (id : string | number, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.delete(
@@ -48,14 +81,19 @@ export const deleteProduct = createAsyncThunk(
         toast.success("item was deleted successfully");
       }
     } catch (error) {
-      toast.error(error.response.data.message);
-      return ;
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "An error occurred");
+        return rejectWithValue(error.response?.data?.message);
+      } else {
+        toast.error("An unexpected error occurred");
+        return rejectWithValue("An unexpected error occurred");
+      }
     }
   }
 );
 export const getProduct = createAsyncThunk(
   "products/getProduct",
-  async (id, { rejectWithValue }) => {
+  async (id : string | undefined, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
@@ -70,39 +108,53 @@ export const getProduct = createAsyncThunk(
         return response.data;
       }
     } catch (error) {
-      toast.error(error.response.data.message);
-      return rejectWithValue(error.response.data.message);
-    }
-  }
-);
-
-export const updateProduct = createAsyncThunk(
-  "products/updateProduct",
-  async ({ data, id }, { rejectWithValue }) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        `https://test1.focal-x.com/api/items/${id}`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.status === 201 || response.status === 200) {
-        console.log("Updated successfully");
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "An error occurred");
+        return rejectWithValue(error.response?.data?.message);
+      } else {
+        toast.error("An unexpected error occurred");
+        return rejectWithValue("An unexpected error occurred");
       }
-    } catch (error) {
-      toast.error(error.response.data.message);
-      return rejectWithValue(error.response.data.message);
     }
   }
 );
+interface UpdateProductParams {
+  data: FormData; 
+  id: string | undefined; 
+}
+export const updateProduct = createAsyncThunk<
+  void, 
+  UpdateProductParams, 
+  { rejectValue: string } 
+>("products/updateProduct", async ({ data, id }, { rejectWithValue }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.post(
+      `https://test1.focal-x.com/api/items/${id}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (response.status === 201 || response.status === 200) {
+      console.log("Updated successfully");
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      toast.error(error.response?.data?.message || "An error occurred");
+      return rejectWithValue(error.response?.data?.message);
+    } else {
+      toast.error("An unexpected error occurred");
+      return rejectWithValue("An unexpected error occurred");
+    }
+  }
+});
 
 export const addProduct = createAsyncThunk(
   "products/addProduct",
-  async (data, { rejectWithValue }) => {
+  async (data: FormData, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
@@ -118,8 +170,13 @@ export const addProduct = createAsyncThunk(
         console.log("Added successfully");
       }
     } catch (error) {
-      toast.error(error.response.data.message);
-      return rejectWithValue(error.response.data.message);
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "An error occurred");
+        return rejectWithValue(error.response?.data?.message);
+      } else {
+        toast.error("An unexpected error occurred");
+        return rejectWithValue("An unexpected error occurred");
+      }
     }
   }
 );
@@ -137,12 +194,12 @@ const ProductsSlice = createSlice({
     setPage : (state,action) => {
       state.currentPage = action.payload;
     },
-    prevPage : (state,action) => {
+    prevPage : (state) => {
       if (state.currentPage > 1) {
         state.currentPage = state.currentPage - 1;
       }
     },
-    nextPage : (state,action) => {
+    nextPage : (state) => {
       if (state.currentPage < state.totalPages) {
         state.currentPage = state.currentPage + 1;
       }
@@ -170,10 +227,10 @@ const ProductsSlice = createSlice({
       .addCase(deleteProduct.pending, (state) => {
         state.loading = true;
       })
-      .addCase(deleteProduct.fulfilled, (state, action) => {
+      .addCase(deleteProduct.fulfilled, (state) => {
         state.loading = false;
       })
-      .addCase(deleteProduct.rejected, (state, action) => {
+      .addCase(deleteProduct.rejected, (state) => {
         state.loading = false;
       })
       .addCase(getProduct.pending, (state) => {
@@ -181,7 +238,7 @@ const ProductsSlice = createSlice({
       })
       .addCase(getProduct.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        state.product = action.payload;
       })
       .addCase(getProduct.rejected, (state, action) => {
         state.loading = false;
@@ -190,7 +247,7 @@ const ProductsSlice = createSlice({
       .addCase(updateProduct.pending, (state) => {
         state.loading = true;
       })
-      .addCase(updateProduct.fulfilled, (state, action) => {
+      .addCase(updateProduct.fulfilled, (state) => {
         state.loading = false;
       })
       .addCase(updateProduct.rejected, (state, action) => {
@@ -200,7 +257,7 @@ const ProductsSlice = createSlice({
       .addCase(addProduct.pending, (state) => {
         state.loading = true;
       })
-      .addCase(addProduct.fulfilled, (state, action) => {
+      .addCase(addProduct.fulfilled, (state) => {
         state.loading = false;
       })
       .addCase(addProduct.rejected, (state, action) => {

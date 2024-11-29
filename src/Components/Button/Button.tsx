@@ -1,8 +1,8 @@
 import React from "react"
 
 interface ButtonProps {
-    text: string;
-    type: string;
+  text: string;
+  type: "submit" | "reset" | "button";
 }
 
 const Button : React.FC<ButtonProps> = ({text,type}) => {

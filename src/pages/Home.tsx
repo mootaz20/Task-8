@@ -9,9 +9,9 @@ import { IoMdClose } from "react-icons/io";
 import toast from "react-hot-toast";
 
 const Home = () => {
-  const userPhoto: string = localStorage.getItem('image');
-  const first: string = localStorage.getItem("First-Name");
-  const last: string = localStorage.getItem("Last-Name");
+  const userPhoto: string = localStorage.getItem("image") ?? "";
+  const first: string = localStorage.getItem("First-Name") ?? "";
+  const last: string = localStorage.getItem("Last-Name") ?? "";
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const navigate = useNavigate();
 

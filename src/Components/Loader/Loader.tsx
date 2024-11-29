@@ -1,5 +1,9 @@
 
-const Loader = ({auth}) => {
+interface LoaderProps { 
+  auth : boolean
+}
+
+const Loader: React.FC<LoaderProps> = ({ auth }) => {
   return (
     <div className="flex justify-center items-center">
       <div
@@ -8,6 +12,6 @@ const Loader = ({auth}) => {
         } `}></div>
     </div>
   );
-}
+};
 
 export default Loader

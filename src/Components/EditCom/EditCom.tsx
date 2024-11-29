@@ -5,70 +5,76 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../Loader/Loader";
 import toast from "react-hot-toast";
+import { AppDispatch, RootState } from "../../redux/Store";
 
-const EditCom = () => {
+const EditCom: React.FC = () => {
   const { id } = useParams();
-  const dispatch = useDispatch();
-  const file = useRef();
-  const { products, loading } = useSelector((state) => state.products);
+  const dispatch = useDispatch<AppDispatch>();
+  const file = useRef<HTMLInputElement | null>(null);
+  const { product, loading } = useSelector(
+    (state: RootState) => state.products
+  );
   const navigate = useNavigate();
-  const [name,setname] = useState<string>('');
-  const [price,setprice] = useState<string>('');
+  const [name, setname] = useState<string | null>("");
+  const [price, setprice] = useState<string | null>("");
   const [previewImage, setPreviewImage] = useState<string>("");
   const [image, setimage] = useState<File | string>("");
   const [loadingAfterSave, setloadingAfterSave] = useState<boolean>(false);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      await dispatch(getProduct(id));
+    };
+    fetchData();
+  }, [dispatch, id]);
 
   useEffect(() => {
-    const fetchData = async ()=>{
-      await dispatch(getProduct(id));
+    if (product) {
+      setname(product.name || null);
+      setprice(product.price || null);
+      setPreviewImage(product.image_url || "/assets/image/image 2.png");
     }
-    fetchData();
-  }, [dispatch,id]);
+  }, [product]);
 
-  useEffect(()=>{
-   if(products){
-     setname(products.name || null);
-     setprice(products.price || null);
-     setPreviewImage(products.image_url || '/assets/image/image 2.png');
-   }  
-  },[products]);
-
-  const handleBackClick = () : void => {
+  const handleBackClick = (): void => {
     navigate("/dashboard");
   };
 
-
-  const handleButtonImage = () => {
-    file.current.click();
-  }
-  const handleImageChange = (e : React.ChangeEvent<HTMLInputElement>) : void => {
-    const file = e.target.files[0];
-    if(file){
+  const handleButtonImage = (): void => {
+    if (file.current) {
+      file.current.click();
+    }
+  };
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      setimage(file);
       const imageUrl = URL.createObjectURL(file);
       setPreviewImage(imageUrl);
     }
-    setimage(file);
   };
 
   const handleEditClick = () => {
     setloadingAfterSave(true);
     const data = new FormData();
-    data.append('name', name);
-    data.append('price', price);  
+    if(name){
+      data.append("name", name);
+    }
+    if(price){
+      data.append("price", price);
+    }
     data.append("_method", "PUT");
-    if(image){
+    if (image) {
       data.append("image", image);
     }
-    dispatch(updateProduct({data,id})).then((result)=> {
-      if(result.meta.requestStatus === "fulfilled"){
+    dispatch(updateProduct({ data, id })).then((result) => {
+      if (result.meta.requestStatus === "fulfilled") {
         toast.success("Product updated successfully");
         setloadingAfterSave(false);
         navigate("/dashboard");
       }
     });
   };
-
 
   return (
     <div className="show lg:px-16 px-6 pt-6 pb-12">
@@ -106,7 +112,7 @@ const EditCom = () => {
                   <input
                     type="text"
                     className="py-3 px-4 font-medium rounded border border-1 border-editBorderColor"
-                    value={name}
+                    value={name ? name : "name"}
                     onChange={(e) => setname(e.target.value)}
                   />
                 </div>
@@ -119,7 +125,7 @@ const EditCom = () => {
                   <input
                     type="number"
                     className="py-3 px-4 font-medium rounded border border-1 border-editBorderColor"
-                    value={price}
+                    value={price ? price : "0" }
                     onChange={(e) => setprice(e.target.value)}
                   />
                 </div>
@@ -167,6 +173,6 @@ const EditCom = () => {
       </div>
     </div>
   );
-}
+};
 
 export default EditCom

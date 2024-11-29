@@ -25,19 +25,21 @@ const SignUp = () => {
     const [previewImage, setPreviewImage] = useState('');
     const [error, setError] = useState<ErrorState>({});
     const [loading, setloading] = useState<boolean>(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
     const navigate = useNavigate();
 
     const handleClick = () : void => {
-        fileInputRef.current.click();
+         if (fileInputRef.current) {
+           fileInputRef.current.click(); 
+         }
     }
     const handleFile = (e : React.ChangeEvent<HTMLInputElement>) =>{
-      const file = e.target.files[0];
+      const file = e.target.files ? e.target.files[0] : null;
       if(file){
+        setimage(file);
         const url = URL.createObjectURL(file);
         setPreviewImage(url);
       }
-      setimage(file);
     }
     const handleEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
       setemail(e.target.value)
@@ -156,7 +158,7 @@ const SignUp = () => {
             <div className="mb-4 md:flex md:flex-wrap md:space-x-6">
               <div className="md:flex-1 w-full md:mb-0 mb-2">
                 <InputCom
-                  error={error.first}
+                  error={error.first || ''}
                   callBackFunction={handlefirst}
                   value={first}
                   label=""
@@ -173,7 +175,7 @@ const SignUp = () => {
                 <InputCom
                   callBackFunction={handlelast}
                   value={last}
-                  error={error.last}
+                  error={error.last || ''}
                   label=""
                   type="text"
                   placeholder="Last Name"
@@ -189,7 +191,7 @@ const SignUp = () => {
               <InputCom
                 callBackFunction={handleEmail}
                 value={email}
-                error={error.email}
+                error={error.email || ''}
                 label="Email"
                 type="email"
                 placeholder="Enter your email"
@@ -211,7 +213,7 @@ const SignUp = () => {
                 <InputCom
                   callBackFunction={handlePassword}
                   value={password}
-                  error={error.password}
+                  error={error.password || ''}
                   label=""
                   type="password"
                   placeholder="Password"
@@ -226,7 +228,7 @@ const SignUp = () => {
                 <InputCom
                   callBackFunction={handleconfirm}
                   value={confirm}
-                  error={error.confirm}
+                  error={error.confirm || ''}
                   label=""
                   type="password"
                   placeholder="Confirm Password"

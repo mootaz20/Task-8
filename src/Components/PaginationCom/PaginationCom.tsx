@@ -1,13 +1,14 @@
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import { useDispatch, useSelector } from "react-redux";
 import { nextPage, prevPage, setPage } from "../../redux/Slice";
+import { RootState } from "../../redux/Store";
 
 const PaginationCom = () => {
-  const { totalPages , currentPage } = useSelector((state) => state.products);
+  const { totalPages , currentPage } = useSelector((state: RootState) => state.products);
   const dispatch = useDispatch();
 
 
-  const handlePageChange = (number) : void => {
+  const handlePageChange = (number : number) : void => {
     dispatch(setPage(number));
   };
   const handlePrevClick = () : void =>{
@@ -18,32 +19,32 @@ const PaginationCom = () => {
     dispatch(nextPage());
     };
 
-     const renderPages = () : number[]=> {
+     const renderPages = (): (number | string)[] => {
        const pages = [];
 
-       if(totalPages === 0){
-        pages.push(1);
-        return pages;
+       if (totalPages === 0) {
+         pages.push(1);
+         return pages;
        }
 
-       if(totalPages === 1 || totalPages === 2 || totalPages === 3){
-        for (let index = 1; index <= totalPages; index++) {
-          pages.push(index);
-        }
-        return pages;
+       if (totalPages === 1 || totalPages === 2 || totalPages === 3) {
+         for (let index = 1; index <= totalPages; index++) {
+           pages.push(index);
+         }
+         return pages;
        }
-       if(currentPage <= totalPages - 3){
-        for (let index = currentPage; index < currentPage + 3; index++) {
-        pages.push(index);
-       }
-       pages.push("...");
-       pages.push(totalPages);
-       }else{
-          pages[0] = 1;
-          pages[1] = "...";
-          for (let index = totalPages - 2; index <= totalPages; index++) {
-            pages.push(index);
-          }
+       if (currentPage <= totalPages - 3) {
+         for (let index = currentPage; index < currentPage + 3; index++) {
+           pages.push(index);
+         }
+         pages.push("...");
+         pages.push(totalPages);
+       } else {
+         pages[0] = 1;
+         pages[1] = "...";
+         for (let index = totalPages - 2; index <= totalPages; index++) {
+           pages.push(index);
+         }
        }
 
        return pages;
@@ -67,19 +68,19 @@ const PaginationCom = () => {
         <button
           key={index}
           className={`w-[40px] h-[40px] md:w-[60px] md:h-[60px] font-semibold ${
-            page === "..." ? "rounded-lg" : "rounded-full"
+            String(page) === "..." ? "rounded-lg" : "rounded-full"
           } ${
             page === currentPage ? "text-white bg-customyellow" : "bg-white"
           }`}
           style={{
             fontSize: "13px",
             border:
-              page === "..."
+              String(page) === "..."
                 ? ""
                 : page === currentPage
                 ? ""
                 : "1px solid rgba(241, 241, 241, 1)",
-            cursor: page === "..." ? "default" : "pointer",
+            cursor: String(page) === "..." ? "default" : "pointer",
           }}
           onClick={() => typeof page === "number" && handlePageChange(page)}>
           {page}
