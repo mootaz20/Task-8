@@ -7,7 +7,7 @@ function App() {
   return (
     <>
       <Toaster />
-      <BrowserRouter basename="/Task-8/">
+      <BrowserRouter>
         <div>
           <AppRouter />
         </div>
